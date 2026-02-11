@@ -237,20 +237,25 @@ class RTSPPlayer(QMainWindow):
             self.update_status("נגן משהו לפני צילום מסך", "orange")
             return
             
-        # שימוש בתיקיית התמונות האישית של המשתמש (יותר בטוח לעברית)
-        pictures_dir = os.path.join(os.path.expanduser("~"), "Pictures")
+        # יצירת תיקיית snapshots בתוך תיקיית הפרויקט
+        snap_dir = os.path.join(os.getcwd(), "snapshots")
+        if not os.path.exists(snap_dir):
+            try:
+                os.makedirs(snap_dir)
+            except Exception as e:
+                print(f"DEBUG: Could not create folder: {e}")
         
         timestamp = time.strftime("%Y%m%d-%H%M%S")
-        filename = os.path.abspath(os.path.join(pictures_dir, f"snap_{timestamp}.png"))
+        filename = os.path.join(snap_dir, f"snap_{timestamp}.png")
         
-        # ב-Windows, VLC מעדיף נתיב נקי ומנורמל
-        clean_path = os.path.normpath(filename)
+        # המרה לנתיב אבסולוטי ומנורמל עבור VLC
+        clean_path = os.path.normpath(os.path.abspath(filename))
         
         # ביצוע הצילום
         result = self.mediaplayer.video_take_snapshot(0, clean_path, 0, 0)
         
         if result == 0:
-            self.update_status(f"צילום נשמר בתיקיית התמונות!", "#1565c0")
+            self.update_status(f"צילום נשמר בתיקיית snapshots!", "#1565c0")
         else:
             self.update_status("שגיאה בשמירת הצילום", "#c62828")
 
